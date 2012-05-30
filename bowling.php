@@ -3,6 +3,7 @@ class BowlingGame {
 
 	private $frame = 1;
 	public function getFrame() { return $this->frame; }
+	public function getRoll() { return count($this->roll_list[ $this->frame ])+1; }
 	
 	private $finished = false;
 	public function getFinished() { return $this->finished; }
@@ -137,11 +138,6 @@ class BowlingGame {
 		if ($this->roll_list[ $frame_num ][0] != 10 && $this->origFrameScore($frame_num) == 10) return true;
 	}
 	
-	public function rollOutLoud($pins) {
-		echo 'F' . $this->frame . ',R' . (count($this->roll_list[ $this->frame ])+1) . ' Rolling ' . $pins . "\n\n";
-		$this->roll($pins);
-	}
-	
 	public function getScore() {
 		$score = 0;
 		for ($i = 1; $i <= 10; $i++) {
@@ -156,7 +152,7 @@ class BowlingGame {
 		$score_increment = 0;
 		//+-----+--------+
 		//| 5| 4| X| X| X|
-		//|  +--|  +--+--+
+		//|  +--|  +--+--|
 		//|    9|        |
 		//+-----+--------+
 		echo '+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+' . "\n";
@@ -219,11 +215,13 @@ $game = new BowlingGame();
 while ($game->getFinished() === false) {
 	
 	$game->displayScoreSheet();
-	echo 'Roll: ';
+	echo 'F:' . $game->getFrame();
+	echo ' R:' . $game->getRoll();
+	echo ' Pins: ';
 	$pins = trim(fgets( STDIN ));
 	
 	try {
-		$game->rollOutLoud($pins);
+		$game->roll($pins);
 	}
 	catch (Exception $e) {
 		echo '<< ' . $e->getMessage() . ' >>' . "\n\n";
