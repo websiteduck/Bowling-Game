@@ -229,4 +229,4 @@ while ($game->getFinished() === false) {
 }
 
 $game->displayScoreSheet();
-echo 'Final Score: ' . $game->getScore();
+echo 'Final Score: ' . $game->getScore() . "\n\n";

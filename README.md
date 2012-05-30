@@ -1,4 +1,5 @@
 Bowling-Game
 ============
 
-PHP Bowling Game
+From the command line:  
+php bowling.php
