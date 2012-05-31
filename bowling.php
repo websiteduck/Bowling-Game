@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
 require 'bowlinggame.php';
 
 $game = new BowlingGame();
@@ -15,6 +16,7 @@ while ($game->getFinished() === false) {
 		$game->roll($pins);
 	}
 	catch (Exception $e) {
+        $game->resetFrame();
 		echo '<< ' . $e->getMessage() . ' >>' . "\n\n";
 	}	
 }
