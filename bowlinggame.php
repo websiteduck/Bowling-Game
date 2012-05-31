@@ -3,47 +3,47 @@ require 'frame.php';
 
 class BowlingGame {
 
-	private $iframe = 1;
-	public function getFrame() { return $this->iframe; }
-	public function getRoll() { return count($this->frames[$this->iframe]->rolls)+1; }
-	
-	private $finished = false;
-	public function getFinished() { return $this->finished; }
-	
-	private $frames = array();
-	
-	public function __construct() {
-		for ($i = 1; $i <= 10; $i++) $this->frames[$i] = new Frame;
+    private $iframe = 1;
+    public function getFrame() { return $this->iframe; }
+    public function getRoll() { return count($this->frames[$this->iframe]->rolls)+1; }
+    
+    private $finished = false;
+    public function getFinished() { return $this->finished; }
+    
+    private $frames = array();
+    
+    public function __construct() {
+        for ($i = 1; $i <= 10; $i++) $this->frames[$i] = new Frame;
         $this->frames[10]->tenth = true;
-	}
-	
-	public function roll($pins) {
+    }
+
+    public function roll($pins) {
         $frame = &$this->frames[$this->iframe];
 
-		//If $pins is a string, make sure the string contains only an int, then convert it to int
+        //If $pins is a string, make sure the string contains only an int, then convert it to int
         if ($pins === 'x' || $pins === 'X') $pins = 10;
-		if (!is_int($pins) && preg_match("/^[0-9]+$/", $pins)) $pins = (int)$pins;
-		if (!is_int($pins)) throw new Exception('Invalid Roll');
-		
-		if ($pins > 10 || $pins < 0) 
-			throw new Exception('Invalid Roll');
-			
-		$frame->addRoll($pins);
-		
-		if ($frame->tenth && $frame->completed) {
-			$this->finished = true;
+        if (!is_int($pins) && preg_match("/^[0-9]+$/", $pins)) $pins = (int)$pins;
+        if (!is_int($pins)) throw new Exception('Invalid Roll');
+        
+        if ($pins > 10 || $pins < 0) 
+            throw new Exception('Invalid Roll');
+        
+        $frame->addRoll($pins);
+        
+        if ($frame->tenth && $frame->completed) {
+            $this->finished = true;
             return;
-		}
-		
-		$this->calculateWaitFrames();
+        }
+        
+        $this->calculateWaitFrames();
         if ($frame->completed) $this->iframe++;
-	}
+    }
     
     public function resetFrame() {
         $this->frames[$this->iframe]->reset();
     }
-	
-	private function calculateWaitFrames() {
+    
+    private function calculateWaitFrames() {
         $frames = &$this->frames;
         for ($i = $this->iframe - 2; $i <= 10; $i++) {
             $frame = &$frames[$i];
@@ -65,30 +65,30 @@ class BowlingGame {
                     $frame->wait = false;
                 }
             }
-		}
-	}
-	
-	public function getScore() {
-		$score = 0;
-		for ($i = 1; $i <= 10; $i++) {
+        }
+    }
+    
+    public function getScore() {
+        $score = 0;
+        for ($i = 1; $i <= 10; $i++) {
             if ($this->frames[$i]->completed === false) return $score;
-			if ($this->frames[$i]->wait) return $score;
-			$score += $this->frames[$i]->score;
-		}
-		return $score;
-	}
-	
-	public function displayScoreSheet() {
+            if ($this->frames[$i]->wait) return $score;
+            $score += $this->frames[$i]->score;
+        }
+        return $score;
+    }
+    
+    public function displayScoreSheet() {
         $frames = &$this->frames;
-		//+-----+--------+
-		//| 5| 4| X| X| X|
-		//|  +--|  +--+--|
-		//|    9|        |
-		//+-----+--------+
-		echo '+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+' . "\n";
-		for ($i = 1; $i <= 10; $i++) {
-			$frame = &$frames[$i];
-			echo '| ';
+        //+-----+--------+
+        //| 5| 4| X| X| X|
+        //|  +--|  +--+--|
+        //|    9|        |
+        //+-----+--------+
+        echo '+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+' . "\n";
+        for ($i = 1; $i <= 10; $i++) {
+            $frame = &$frames[$i];
+            echo '| ';
             
             if ($frame->strike) echo ' ';
             elseif (isset($frame->rolls[0])) {
@@ -101,7 +101,7 @@ class BowlingGame {
             }
             else echo ' ';
             
-			echo '| ';
+            echo '| ';
             
             if ($frame->spare) echo '/';
             elseif (isset($frame->rolls[1])) {
@@ -118,7 +118,7 @@ class BowlingGame {
             else echo ' ';
             
             if ($frame->tenth) {
-				echo '| ';
+                echo '| ';
                 if (isset($frame->rolls[2])) {
                     if ($frame->rolls[2] == 10) echo 'X';
                     elseif ($frame->rolls[2] == 0) echo '-';
@@ -128,24 +128,24 @@ class BowlingGame {
                     echo '#';
                 }
                 else echo ' ';
-			}
-		}
-		echo '|' . "\n";
-		echo '|  +--|  +--|  +--|  +--|  +--|  +--|  +--|  +--|  +--|  +--+--|' . "\n";
+            }
+        }
+        echo '|' . "\n";
+        echo '|  +--|  +--|  +--|  +--|  +--|  +--|  +--|  +--|  +--|  +--+--|' . "\n";
         $stop_scoring = false;
-		$score_increment = 0;
-		for ($i = 1; $i <= 10; $i++) {
+        $score_increment = 0;
+        for ($i = 1; $i <= 10; $i++) {
             $frame = &$frames[$i];
-			if ($frame->wait || $frame->completed === false) $stop_scoring = true;
-			$score_increment += $frame->score;
-			echo '|  ';
-			if ($frame->tenth) echo '   ';
-			if ($stop_scoring) echo '   ';
-			else echo str_pad($score_increment, 3, ' ', STR_PAD_LEFT);
-		}
-		echo '|' . "\n";
-		echo '+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+' . "\n";
-		echo 'Score: ' . $this->getScore() . "\n\n";
-	}
-	
+            if ($frame->wait || $frame->completed === false) $stop_scoring = true;
+            $score_increment += $frame->score;
+            echo '|  ';
+            if ($frame->tenth) echo '   ';
+            if ($stop_scoring) echo '   ';
+            else echo str_pad($score_increment, 3, ' ', STR_PAD_LEFT);
+        }
+        echo '|' . "\n";
+        echo '+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+' . "\n";
+        echo 'Score: ' . $this->getScore() . "\n\n";
+    }
+
 }
